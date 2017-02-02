@@ -31,11 +31,11 @@ else:
 
 try:
     os.mkdir(args.output_dir)
-    os.chdir(args.output_dir)
 except OSError as e:
     if e.errno != errno.EEXIST:
         raise e
     pass
+os.chdir(args.output_dir)
 print "Created '{0}' directory to save crawl results".format(args.output_dir)
 
 def crawl():
@@ -46,14 +46,19 @@ def crawl():
         'Level' : 1,
     })
     url_crawled = []
+
     while (url_list and len(url_crawled) < args.limit):
         url_dictionary = url_list.pop(0)
         url = url_dictionary['Url'].rstrip('/')
         html_file_name = re.compile('.*\/(.*)').search(url).group(1)
+
         web_page, child_url_list = crawl_web_page(url)
+
         with open(html_file_name, 'w') as html_file:
             html_file.write(web_page.encode('utf-8'))
+
         url_crawled.append(url_dictionary)
+
         if url_dictionary['Level'] < args.depth and child_url_list:
             child_url_dict_list = []
             for link in child_url_list:
@@ -75,7 +80,10 @@ def crawl():
                 url_list = child_url_dict_list + url_list
             else:
                 url_list += child_url_dict_list
+            url_list = url_list[0:args.limit]
+
         time.sleep(args.wait_between)
+
     with open('links.txt', 'w') as link_file:
         for url in (url_crawled):
             link_file.write("{0}\n".format(url['Url'].encode('utf-8')))
@@ -89,6 +97,7 @@ def remove_dupe_based_on_value_of_key(list_dict, key):
 def crawl_web_page(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
+
     url_list = []
     href_regex = re.compile('^https:\/\/en\.wikipedia\.org\/wiki')
     keyword_regex = re.compile(re.escape(args.keyword), flags = re.IGNORECASE)
@@ -102,7 +111,9 @@ def crawl_web_page(url):
                     'Text' : link.string,
                 })
     url_list = remove_dupe_based_on_value_of_key(url_list, 'Url')
+
     return soup.prettify(), url_list
 
 crawl()
+
 print "Find the links crawled in 'links.txt' under '{0}' directory\nCompleted in {1}".format(args.output_dir, datetime.now() - startTime)
