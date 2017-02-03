@@ -1,0 +1,21 @@
+The valuable information to be got from a website is usually found in links with shallow depths. Depth First Search algorithm continues with a branch from the seed url until it reaches the leaf node and hence it ends up producing low quality results. On the contrary Breadth First Search is optimal and produces better results, but consumes a lot of memory to store all child links at each level.
+
+Breadth First Search:
+	URL's Crawled: 434 
+	Top 5:
+		https://en.wikipedia.org/wiki/Sustainable_energy
+		https://en.wikipedia.org/wiki/Solar_energy
+		https://en.wikipedia.org/wiki/Solar_heating
+		https://en.wikipedia.org/wiki/Solar_photovoltaics
+		https://en.wikipedia.org/wiki/Solar_thermal
+
+Depth First Search:
+	URL's Crawled: 251
+	Top 5:
+		https://en.wikipedia.org/wiki/Sustainable_energy
+		https://en.wikipedia.org/wiki/Solar_energy
+		https://en.wikipedia.org/wiki/Solar_Energy_(journal)
+		https://en.wikipedia.org/wiki/Solar_heating
+		https://en.wikipedia.org/wiki/Solar_constant
+
+From the above result its evident that the depth first search traverses lesser link since we've coupled it with depth. And also the quality of links relevant to the seed url is better in breadth first search.

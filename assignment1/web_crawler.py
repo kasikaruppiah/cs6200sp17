@@ -42,7 +42,6 @@ def crawl():
     url_list = []
     url_list.append({
         'Url' : args.seed_url,
-        'Text' : 'Seed-URL',
         'Level' : 1,
     })
     url_crawled = []
@@ -52,47 +51,32 @@ def crawl():
         url = url_dictionary['Url'].rstrip('/')
         html_file_name = re.compile('.*\/(.*)').search(url).group(1)
 
-        web_page, child_url_list = crawl_web_page(url)
+        if url not in url_crawled:
+            web_page, child_url_list = crawl_web_page(url)
 
-        with open(html_file_name, 'w') as html_file:
-            html_file.write(web_page.encode('utf-8'))
+            with open(html_file_name, 'w') as html_file:
+                html_file.write(web_page.encode('utf-8'))
 
-        url_crawled.append(url_dictionary)
+            url_crawled.append(url)
 
-        if url_dictionary['Level'] < args.depth and child_url_list:
-            child_url_dict_list = []
-            for link in child_url_list:
-                flag = 0
-                if not any(url_dict['Url'] == link['Url'] for url_dict in url_crawled):
-                    if args.alternate_crawling:
-                        url_list = [url_dict for url_dict in url_list if url_dict['Url'] != link['Url']]
-                        flag = 1
-                    else:
-                        if not any(url_dict['Url'] == link['Url'] for url_dict in url_list):
-                            flag = 1
-                if flag == 1:
+            if url_dictionary['Level'] < args.depth and child_url_list:
+                child_url_dict_list = []
+                for link in child_url_list:
                     child_url_dict_list.append({
-                        'Url' : link['Url'],
-                        'Text' : link['Text'],
+                        'Url' : link,
                         'Level' : url_dictionary['Level'] + 1,
                     })
-            if args.alternate_crawling:
-                url_list = child_url_dict_list + url_list
-            else:
-                url_list += child_url_dict_list
-            url_list = url_list[0:args.limit]
+                if args.alternate_crawling:
+                    url_list = child_url_dict_list + url_list
+                else:
+                    url_list += child_url_dict_list
 
-        time.sleep(args.wait_between)
+            time.sleep(args.wait_between)
 
     with open('links.txt', 'w') as link_file:
         for url in (url_crawled):
-            link_file.write("{0}\n".format(url['Url'].encode('utf-8')))
+            link_file.write("{0}\n".format(url.encode('utf-8')))
     print "Crawled {0} links".format(len(url_crawled))
-
-def remove_dupe_based_on_value_of_key(list_dict, key):
-    seen = set()
-    seen_add = seen.add
-    return [dic for dic in list_dict if not (dic[key] in seen or seen_add(dic[key]))]
 
 def crawl_web_page(url):
     response = requests.get(url)
@@ -106,11 +90,7 @@ def crawl_web_page(url):
         for link in soup.find_all('a', href = re.compile('^[^#]((?!\/(Talk|User|User talk|Wikipedia|Wikipedia talk|File|File talk|MediaWiki|MediaWiki talk|Template|Template talk|Help|Help talk|Category|Category talk|Portal|Portal talk|Book|Book talk|Draft|Draft talk|Education Program|Education Program talk|TimedText|TimedText talk|Module|Module talk|Gadget|Gadget talk|Gadget definition|Gadget definition talk|Special|Media):).)+$'), string = True):
             child_url = urljoin(url, link.get('href'))
             if href_regex.match(child_url) and ((args.keyword and (keyword_regex.match(child_url) or keyword_regex.match(link.string))) or not args.keyword):
-                url_list.append({
-                    'Url' : child_url,
-                    'Text' : link.string,
-                })
-    url_list = remove_dupe_based_on_value_of_key(url_list, 'Url')
+                url_list.append(child_url.split('#', 1)[0])
 
     return soup.prettify(), url_list
 

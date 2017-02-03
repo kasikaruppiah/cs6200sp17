@@ -1,0 +1,5 @@
+1) Since the runs were independant and the seed url is different, I would start with standardizing the data to make merging a fair process
+2) To standardize the results I would gather the page ranking of each url and create a ration based off of the position of the url in the crawl, and the page rank
+3) Use the ration to compare the urls at the same level, and prepare a new list of url based on the ordering of ratio
+4) While creating a new list we would have to check if the url is already present in the list, if so the recent occurance is ignored
+5) If 2 urls are at the same level and the ratio are same we'll use the position of the url in the crawl to decide the importance
