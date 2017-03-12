@@ -67,6 +67,20 @@ parser.add_argument(
     default='in_link.txt',
     help='in-link relationship file to use to compute pagerank',
     required=False)
+parser.add_argument(
+    '-c',
+    '--convergence',
+    type=int,
+    default=1,
+    help='Diff of perplexity value to be considered for convergence',
+    required=False)
+parser.add_argument(
+    '-d',
+    '--iterations',
+    type=int,
+    default=4,
+    help='Iterations to check for convergence',
+    required=False)
 args = parser.parse_args()
 
 startTime = datetime.now()
@@ -92,19 +106,21 @@ if args.seed_url:
         HTML_DIRECTORY)
     webcrawler.crawl({
         'BASE_DIRECTORY': args.output_dir,
-        'SEED_URL': args.seed_url,
-        'KEYWORD': args.keyword,
-        'LIMIT': args.limit,
         'DEPTH': args.depth,
         'DEPTH_FIRST_CRAWL': args.depth_first_crawl,
-        'POLITENESS': args.politeness
+        'KEYWORD': args.keyword,
+        'LIMIT': args.limit,
+        'POLITENESS': args.politeness,
+        'SEED_URL': args.seed_url
     })
 
 if args.pagerank:
     print "Triggering pagerank."
     pagerank.generate_pagerank({
         'BASE_DIRECTORY': args.output_dir,
-        'IN_LINK_FILE': args.in_link
+        'CONVERGENCE': args.convergence,
+        'IN_LINK_FILE': args.in_link,
+        'ITERATIONS': args.iterations
     })
 
 print "Completed in {} seconds.".format(datetime.now() - startTime)

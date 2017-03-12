@@ -6,8 +6,10 @@ import math
 import os
 from collections import OrderedDict
 
+DAMPING_FACTOR = 0.85
 
-# args: BASE_DIRECTORY, IN_LINK_FILE
+
+# args: BASE_DIRECTORY, IN_LINK_FILE, CONVERGENCE, ITERATIONS
 def generate_pagerank(args):
     in_link = __create_in_link__({
         'BASE_DIRECTORY': args['BASE_DIRECTORY'],
@@ -17,7 +19,6 @@ def generate_pagerank(args):
     out_link = __create_out_link__({'IN_LINK': in_link})
     out_link_count = __get_out_link_count__({'OUT_LINK': out_link})
     sink_nodes = __get_sink_nodes__({'IN_LINK': in_link, 'OUT_LINK': out_link})
-    damping_factor = 0.85
 
     pagerank = {}
     for documentid in in_link:
@@ -25,22 +26,22 @@ def generate_pagerank(args):
     perplexities = [__calculate_perplexity__({'PAGERANK': pagerank})]
     index = 0
 
-    while index < 4:
+    while index < args['ITERATIONS']:
         new_pagerank = {}
         sink_pagerank = 0
         for documentid in sink_nodes:
             sink_pagerank += pagerank[documentid]
         for documentid in in_link:
-            new_pagerank[documentid] = (1 - damping_factor) / total_documents
+            new_pagerank[documentid] = (1 - DAMPING_FACTOR) / total_documents
             new_pagerank[
-                documentid] += damping_factor * sink_pagerank / total_documents
+                documentid] += DAMPING_FACTOR * sink_pagerank / total_documents
             for in_link_documentid in in_link[documentid]:
-                new_pagerank[documentid] += damping_factor * pagerank[
-                    in_link_documentid] / len(out_link[in_link_documentid])
+                new_pagerank[documentid] += DAMPING_FACTOR * pagerank[
+                    in_link_documentid] / out_link_count[in_link_documentid]
         for documentid in in_link:
             pagerank[documentid] = new_pagerank[documentid]
         new_perplexity = __calculate_perplexity__({'PAGERANK': pagerank})
-        if abs(new_perplexity - perplexities[-1]) < 1:
+        if abs(new_perplexity - perplexities[-1]) < args['CONVERGENCE']:
             index += 1
         else:
             index = 0
@@ -111,5 +112,4 @@ def __calculate_perplexity__(args):
     for documentid in args['PAGERANK']:
         shannon_entropy += args['PAGERANK'][documentid] * math.log(
             args['PAGERANK'][documentid], 2)
-    print shannon_entropy
     return pow(2, -shannon_entropy)
