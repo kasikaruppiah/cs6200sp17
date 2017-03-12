@@ -70,12 +70,12 @@ parser.add_argument(
 parser.add_argument(
     '-c',
     '--convergence',
-    type=int,
+    type=float,
     default=1,
     help='Diff of perplexity value to be considered for convergence',
     required=False)
 parser.add_argument(
-    '-d',
+    '-itr',
     '--iterations',
     type=int,
     default=4,
