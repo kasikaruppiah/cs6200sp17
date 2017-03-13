@@ -5,10 +5,12 @@ import errno
 import os
 from datetime import datetime
 
+import generate_corpus
 import pagerank
 import webcrawler
 
 HTML_DIRECTORY = 'raw_html'
+TOKEN_DIRECTORY = 'tokens'
 
 parser = argparse.ArgumentParser(
     description='This is a triggering script created for cs6200sp17')
@@ -59,27 +61,40 @@ parser.add_argument(
     '--pagerank',
     action='store_true',
     default=False,
-    help='pagerank for in-link relationship',
+    help='pagerank for in-link relationship, defaults to False',
     required=False)
 parser.add_argument(
     '-i',
     '--in-link',
     default='in_link.txt',
-    help='in-link relationship file to use to compute pagerank',
+    help='in-link relationship file to use to compute pagerank, defaults to in_link.txt',
     required=False)
 parser.add_argument(
     '-c',
     '--convergence',
     type=float,
     default=1,
-    help='Diff of perplexity value to be considered for convergence',
+    help='Diff of perplexity value to be considered for convergence, defaults to 1',
     required=False)
 parser.add_argument(
     '-itr',
     '--iterations',
     type=int,
     default=4,
-    help='Iterations to check for convergence',
+    help='Iterations to check for convergence, defaults to 4',
+    required=False)
+parser.add_argument(
+    '-gc',
+    '--generate-corpus',
+    action='store_true',
+    default=False,
+    help='generate corpus from raw html files, defaults to False',
+    required=False)
+parser.add_argument(
+    '-rhd',
+    '--raw-html-directory',
+    default='raw_html',
+    help='raw html file directory, defaults to raw_html',
     required=False)
 args = parser.parse_args()
 
@@ -94,6 +109,10 @@ if args.seed_url:
         pass
     print "Created '{}' directory to save script results.".format(
         args.output_dir)
+else:
+    if not os.path.isdir(args.output_dir):
+        raise Exception(
+            "can't open '{}': No such directory".format(args.output_dir))
 
 if args.seed_url:
     try:
@@ -115,12 +134,40 @@ if args.seed_url:
     })
 
 if args.pagerank:
-    print "Triggering pagerank."
-    pagerank.generate_pagerank({
-        'BASE_DIRECTORY': args.output_dir,
-        'CONVERGENCE': args.convergence,
-        'IN_LINK_FILE': args.in_link,
-        'ITERATIONS': args.iterations
-    })
+    in_link_file_path = os.path.join(args.output_dir, args.in_link)
+    if os.path.isfile(in_link_file_path):
+        print "Triggering pagerank."
+        pagerank.generate_pagerank({
+            'BASE_DIRECTORY': args.output_dir,
+            'CONVERGENCE': args.convergence,
+            'IN_LINK_FILE': args.in_link,
+            'ITERATIONS': args.iterations
+        })
+    else:
+        raise Exception(
+            "can't open '{}': No such file".format(in_link_file_path))
+
+if args.generate_corpus:
+    raw_html_directory_path = os.path.join(args.output_dir,
+                                           args.raw_html_directory)
+    if os.path.isdir(raw_html_directory_path):
+        # TODO: Call generate_corpus after completion of function
+        try:
+            os.makedirs(os.path.join(args.output_dir, TOKEN_DIRECTORY))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise e
+            pass
+        generate_corpus.make_corpus({
+            'BASE_DIRECTORY':
+            args.output_dir,
+            'RAW_HTML_DIRECTORY':
+            args.raw_html_directory,
+            'TOKEN_DIRECTORY':
+            TOKEN_DIRECTORY,
+        })
+    else:
+        raise Exception("can't open '{}': No such directory".format(
+            raw_html_directory_path))
 
 print "Completed in {} seconds.".format(datetime.now() - startTime)

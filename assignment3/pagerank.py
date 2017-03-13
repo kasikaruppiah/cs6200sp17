@@ -6,6 +6,7 @@ import math
 import os
 from collections import OrderedDict
 
+# TODO: move it as parameter to trigger.py
 DAMPING_FACTOR = 0.85
 
 
