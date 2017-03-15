@@ -5,7 +5,7 @@ import errno
 import os
 from datetime import datetime
 
-import generate_corpus
+import inverted_index
 import pagerank
 import webcrawler
 
@@ -84,17 +84,24 @@ parser.add_argument(
     help='Iterations to check for convergence, defaults to 4',
     required=False)
 parser.add_argument(
-    '-gc',
-    '--generate-corpus',
+    '-gii',
+    '--generate-inverted-index',
     action='store_true',
     default=False,
-    help='generate corpus from raw html files, defaults to False',
+    help='generate inverted index from corpus files, defaults to False',
     required=False)
 parser.add_argument(
     '-rhd',
     '--raw-html-directory',
-    default='raw_html',
+    default=HTML_DIRECTORY,
     help='raw html file directory, defaults to raw_html',
+    required=False)
+parser.add_argument(
+    '-ng',
+    '--n-gram',
+    type=int,
+    default=1,
+    help='N-Gram for inverted index, defaults to 1',
     required=False)
 args = parser.parse_args()
 
@@ -147,7 +154,7 @@ if args.pagerank:
         raise Exception(
             "can't open '{}': No such file".format(in_link_file_path))
 
-if args.generate_corpus:
+if args.generate_inverted_index:
     raw_html_directory_path = os.path.join(args.output_dir,
                                            args.raw_html_directory)
     if os.path.isdir(raw_html_directory_path):
@@ -158,13 +165,16 @@ if args.generate_corpus:
             if e.errno != errno.EEXIST:
                 raise e
             pass
-        generate_corpus.make_corpus({
+        print "Triggering inverted_index.\n\tCreated '{}' directory to save tokens.".format(TOKEN_DIRECTORY)
+        inverted_index.generate_inverted_index({
             'BASE_DIRECTORY':
             args.output_dir,
             'RAW_HTML_DIRECTORY':
             args.raw_html_directory,
             'TOKEN_DIRECTORY':
             TOKEN_DIRECTORY,
+            'N_GRAM':
+            args.n_gram
         })
     else:
         raise Exception("can't open '{}': No such directory".format(
