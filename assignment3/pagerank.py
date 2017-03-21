@@ -72,8 +72,9 @@ def __create_in_link__(args):
     with open(os.path.join(args['BASE_DIRECTORY'], args['IN_LINK_FILE']),
               'r') as in_link_file:
         for line in in_link_file:
-            documentids = (list(OrderedDict.fromkeys(line.strip().split(' '))))
+            documentids = line.strip().split(' ')
             in_link_documentid = documentids.pop(0)
+            documentids = (list(OrderedDict.fromkeys(documentids)))
             in_link[in_link_documentid] = documentids
     return in_link
 
