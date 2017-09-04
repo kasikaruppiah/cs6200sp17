@@ -1,0 +1,11 @@
+In Task 1, a brief report on simple statistics over G1 and G2 including for both graphs: (a) the proportion of: (a) pages with no in-­links (sources), (b) pages with no out-­links (sinks)
+
+Both the graphs have 0 pages with no in-links (sources), as for a page to be present in the in-links graph it should have atleast 1 other source with link to the page in question
+
+G1 :
+	a) Proportion of pages with no in-links (sources) = 0
+	b) Proportion of pages with no out-links (sinks) = 0
+
+G2 :
+	a) Proportion of pages with no in-links (sources) = 0
+	b) Proportion of pages with no out-links (sinks) = 0.36

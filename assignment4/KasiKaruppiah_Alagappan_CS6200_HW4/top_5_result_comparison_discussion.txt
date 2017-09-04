@@ -1,0 +1,41 @@
+Query-1		global warming potential
+rank	lucene		bm25
+1		Globalwarming.txt		Globalwarming
+2		Environmentalimpactoftheenergyindustry.txt		Climatechangemitigation
+3		Climatechangemitigation.txt		Climate
+4		Climate.txt		Greenhousegas
+5		Sustainabilityandenvironmentalmanagement.txt		Greenhousegasemissions
+
+Query-2		green power renewable energy
+rank	lucene		bm25
+1		RenewableenergyintheCzechRepublic.txt		Greenaccounting
+2		3Degrees.txt		Greenpaper
+3		RenewableenergyinMexico.txt		Urbanhorticulture
+4		RenewableEnergyCertificates.txt		Animalwaste
+5		RenewableEnergyCertificate.txt		Sustainabilityandenvironmentalmanagement
+
+Query-3		solar energy california
+rank	lucene		bm25
+1		NevadaSolarOne.txt		KernCounty,California
+2		RenewableenergyintheUnitedStates.txt		LosAngeles
+3		SolarDecathlon.txt		Camarillo,California
+4		Solarenergy.txt		Exhaustgas
+5		SiliconValleyPower.txt		WaybackMachine
+
+Query-4		light bulb bulbs alternative alternatives
+rank	lucene		bm25
+1		Phaseoutofincandescentlightbulbs.txt		Phaseoutofincandescentlightbulbs
+2		Incandescentlightbulbs.txt		Incandescentlightbulbs
+3		Incandescentlightbulb.txt		Incandescentlightbulb
+4		Energysavinglamp.txt		Compactfluorescentlamp
+5		Compactfluorescentlamp.txt		Compactfluorescentlights
+
+The results do differ for the four queries across the lucene and bm25 search engines mainly because of the following differences.
+
+1. Indexer
+    In lucene implementation the SimpleAnalyzer is used which splits tokens based on non-letters and then converts it to lowercase.
+    In bm25 we use word unigram index implementation where we remove all punctuations but preserve hyphens, and also retain punctuation within digits, then split based on spaces and convert it to lowercase.
+
+2. Scoring
+    In lucene scoring is based on basic tf x idf but also involves field boost from certain fields(like filename) in the document and how many of the query terms are found in the specified document.
+    In bm25 weighted model the document score is only dependant on the sum of all bm25 scores of terms in query.

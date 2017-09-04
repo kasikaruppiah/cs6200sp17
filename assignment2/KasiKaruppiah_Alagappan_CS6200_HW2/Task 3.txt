@@ -1,0 +1,45 @@
+Top 5 pages by PageRank
+
+Main_Page	:	0.0912147810403
+Uranium	:	0.0421775679911
+Digital_object_identifier	:	0.0274615576872
+International_Standard_Book_Number	:	0.0240176693742
+National_Diet_Library	:	0.0174805070147
+
+Top 5 pages by in-link counts
+
+Main_Page	:	1000
+International_Standard_Book_Number	:	493
+Digital_object_identifier	:	460
+Renewable_energy	:	424
+Efficient_energy_use	:	281
+
+The top 5 pages based on in-link count and top 5 pages based on pagerank are a bit different.
+
+Main_Page :
+	in-links : 1000
+	out-links : 2
+International_Standard_Book_Number :
+	in-links : 493
+	out-links : 6
+Digital_object_identifier :
+	in-links : 460
+	out-links : 6
+Renewable_energy :
+	in-links : 424
+	out-links : 375
+Efficient_energy_use :
+	in-links : 281
+	out-links : 192
+National_Diet_Library :
+	in-links : 197
+	out-links : 3
+Uranium :
+	in-links : 52
+	uranium : 27
+
+The pagerank of a page is dependant on the quantity and pagerank quality of pages that links to the page.
+
+The higher the pagerank of the in-links to the page and fewer out-links from the page, the more the pagerank of the page. The underlying assumption is that more important websites are likely to receive more links from other websites.
+
+Hence the pagerank of a page can be completely different from the order of the in-links to the page. A page with more in-links like Uranium can have higher pagerank than International_Standard_Book_Number because the quality of the links pointing to Uranium have high pagerank than that of International_Standard_Book_Number. Similar is the case with other pages in the top 5 pages by pagerank order. 

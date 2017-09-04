@@ -1,0 +1,15 @@
+Task1
+Create a new IndexWriter of type SimpleAnalyzer
+Create a Document with 3 fields, "contents", "filename" and "fullpath", where "filename" and "fullpath" are stored as it is.
+Add the Document created to the IndexWriter. Repeat until all documents are added.
+Close the IndexWriter.
+Create a new IndexSearcher using the same directory used by IndexWriter.
+Create a new QueryParser of type SimpleAnalyzer and parse the query string.
+Get the TopDocs using the parsed query and IndexSearcher
+Use ScoreDoc to write the document id and score of top 100 results into a file in the same directory of HW4.java and display the result as well. Repeat the same until encountering "q"
+
+Task2
+From the input token directory an word unigram inverted index is created.
+For each term in the query string a bm25 score is computed and added to the document bm25 score.
+Once the score is computed for all terms across documents, the documents are sorted based on the decreasing order of score and top 100 results are written into an output file.
+The same is repeated for all query string until encountering "q"

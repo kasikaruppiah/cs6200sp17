@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
 # Implementing your own inverted indexer. Text processing and corpus statistics.
+
+import math
 import os
 import re
 import string
 from collections import Counter, defaultdict
 
 import matplotlib.pyplot as plt
+import numpy as np
 from bs4 import BeautifulSoup
 
 __inverted_index__ = defaultdict(dict)
@@ -65,8 +68,18 @@ def __tokenize_file__(args):
         'div', id='content')
 
     # remove all script and style elements
-    for html_tag in soup(["script", "style"]):
-        html_tag.extract()
+    for html_tag in soup.findAll(["script", "style", "sup", "sub", "table"]):
+        html_tag.decompose()
+    # remove [ edit ] links
+    for span in soup.findAll("span", {'class': 'mw-editsection'}):
+        span.decompose()
+    # remove References div
+    for div in soup.findAll("div", {'class': ['navbox', 'reflist']}):
+        div.decompose()
+    # remove toc div
+    for div in soup.findAll("div", {'id': 'toc'}):
+        div.decompose()
+
     # remove all html tags
     text = soup.get_text()
     # remove URL's
@@ -79,10 +92,9 @@ def __tokenize_file__(args):
     # remove all string punctuations other than "-", ".", ","
     text = re.sub(r"[!\"#$%&\'()*+/:;<=>?@[\\\]^_`{|}~]", " ", text)
     # remove all "-" not between text
-    # TODO: improve efficiency - find alternative to |
     text = re.sub(r"(?<![a-zA-Z0-9])-|-(?![a-zA-Z0-9])", " ", text)
-    # remove all ,", "." in text not between digits
-
+    # remove all ",", "." in text not between digits
+    text = re.sub(r"(?<![0-9])[,.]|[,.](?![0-9])", " ", text)
     # remove multiple \s+ characters
     text = ' '.join(text.split())
 
@@ -127,49 +139,68 @@ def __find_ngrams__(args):
 # args: BASE_DIRECTORY, N_GRAM
 def __generate_corpus_statistics__(args):
     global __term_frequency__
-    term_document_frequency_text = "term\tdocID\tdf\n"
-    for term, document_frequencies in sorted(dict(__inverted_index__).items()):
-        term_total_frequency = 0
-        for documentid, frequency in sorted(document_frequencies.items()):
-            term_document_frequency_text += "{}\t{}\t{}\n".format(
-                term, documentid, frequency)
-            term_total_frequency += frequency
-        __term_frequency__[term] = term_total_frequency
-    term_frequency_text = "term\ttf\n"
-    for term in sorted(
-            __term_frequency__, key=__term_frequency__.get, reverse=True):
-        term_frequency_text += "{}\t{}\n".format(term,
-                                                    __term_frequency__[term])
+    term_document_frequency = []
+    term_document_frequency.append(['term', 'docID', 'df'])
+
+    for term, document_frequencies in sorted(
+            dict(__inverted_index__).iteritems()):
+        term_document_frequency.append([
+            term, ', '.join(sorted(document_frequencies.keys())),
+            len(document_frequencies)
+        ])
+        __term_frequency__[term] = sum(document_frequencies.values())
     with open(
             os.path.join(args['BASE_DIRECTORY'], 'term_document_frequency_' +
                          str(args['N_GRAM']) + '_gram.txt'),
             'w') as term_document_frequency_file:
-        term_document_frequency_file.write(term_document_frequency_text)
+        term_document_frequency_file.write("\n".join("\t\t".join(map(
+            str, l)) for l in term_document_frequency))
+
+    term_frequency = []
+    term_frequency.append(['term', 'tf'])
+    for term in sorted(
+            __term_frequency__, key=__term_frequency__.get, reverse=True):
+        term_frequency.append([term, __term_frequency__[term]])
+
     with open(
-            os.path.join(args['BASE_DIRECTORY'], 'term_frequency_' +
-                         str(args['N_GRAM']) + '_gram.txt'),
+            os.path.join(
+                args['BASE_DIRECTORY'],
+                'term_frequency_' + str(args['N_GRAM']) + '_gram.txt'),
             'w') as term_frequency_file:
-        term_frequency_file.write(term_frequency_text)
+        term_frequency_file.write(
+            "\n".join("\t\t".join(map(str, l)) for l in term_frequency))
 
 
 # args: BASE_DIRECTORY, N_GRAM
 def __generate_zipfian_curve__(args):
-    token_size = len(__term_frequency__)
     frequencies = __term_frequency__.values()
+    log_frequencies = map(lambda f: math.log(f),
+                          sorted(frequencies, key=int, reverse=True))
     total_tokens = sum(frequencies)
     probabilities = map(lambda f: f * 1.0 / total_tokens, frequencies)
     probabilities.sort(reverse=True)
-    rank_probability = [(rank + 1, probability)
-                        for rank, probability in enumerate(probabilities)]
-    ranks, probs = zip(*rank_probability)
-    plt.xscale('linear')
-    plt.xscale('linear')
-    plt.title("Zipfian Curve - Word {}-Gram".format(args['N_GRAM']))
-    plt.xlabel("Rank (by decreasing frequency)")
-    plt.ylabel("Probability (of occurrence)")
-    plt.plot([1, token_size], [0.1, 0.1 / token_size], label='Expected')
-    plt.plot(ranks, probs, 'r+', label='Actual')
-    plt.legend(loc='upper right')
-    plt.savefig(
-        os.path.join(args['BASE_DIRECTORY'], 'zipfian_curve_' + str(args[
-            'N_GRAM']) + '_gram.png'))
+    ranks = np.array(xrange(1, len(__term_frequency__) + 1))
+    log_ranks = map(lambda r: math.log(r), ranks)
+
+    zipfian_curve = plt.figure(figsize=(16, 6))
+    zipfian_curve.suptitle(
+        "Zipfian Curve - Word {}-Gram".format(args['N_GRAM'], y=1.05))
+    probability_curve = zipfian_curve.add_subplot(121)
+    probability_curve.set_title("Rank vs Probability")
+    probability_curve.set_xlabel("Rank (by decreasing frequency)")
+    probability_curve.set_ylabel("Probability (of occurrence)")
+    probability_curve.plot(ranks, probabilities, 'r+', label='Wiki')
+    probability_curve.legend(loc='upper right')
+    frequency_curve = zipfian_curve.add_subplot(122)
+    frequency_curve.set_title("Log Rank vs Log Frequency")
+    frequency_curve.set_xlabel("log 10 rank")
+    frequency_curve.set_ylabel("log 10 tf")
+    frequency_curve.plot(log_ranks, log_frequencies, 'r+', label='Wiki')
+    frequency_curve.legend(loc='upper right')
+    zipfian_curve.tight_layout()
+    zipfian_curve.subplots_adjust(top=0.85)
+    zipfian_curve.savefig(
+        os.path.join(args['BASE_DIRECTORY'],
+                     'zipfian_curve_' + str(args['N_GRAM']) + '_gram.png'),
+        format='png',
+        dpi=300)

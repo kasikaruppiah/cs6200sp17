@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from urlparse import urljoin
 import re
 import time
+from collections import OrderedDict
 
 startTime = datetime.now()
 
@@ -29,48 +30,42 @@ if args.verbose:
 else:
     logging.basicConfig(format = '%(levelname)s : %(funcName)s - %(message)s')
 
-try:
-    os.mkdir(args.output_dir)
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        raise e
-    pass
-os.chdir(args.output_dir)
-print "Created '{0}' directory to save crawl results".format(args.output_dir)
-
 def crawl():
     url_list = []
-    document_id = 1
+    inlinks = {}
+
+    html_file_name_regex = re.compile('^https:\/\/en\.wikipedia\.org\/wiki\/(.*)')
+    url = args.seed_url.rstrip('/')
+
     url_list.append({
-        'Url' : args.seed_url,
+        'Url' : url,
         'Level' : 1,
         'ParentDocumentID' : 'D0',
-        'DocumentID' : 'D' + str(document_id),
+        'DocumentID' : html_file_name_regex.search(url).group(1),
     })
     url_crawled = []
 
-    while (url_list and len(url_crawled) < args.limit):
+    while url_list and len(url_crawled) < args.limit:
         url_dictionary = url_list.pop(0)
         url = url_dictionary['Url'].rstrip('/')
-        html_file_name = re.compile('.*\/(.*)').search(url).group(1)
 
         if url not in url_crawled:
+            if url_dictionary['ParentDocumentID'] == 'D0':
+                inlinks[url_dictionary['DocumentID']] = []
+            else:
+                inlinks[url_dictionary['DocumentID']] = [url_dictionary['ParentDocumentID']]
+
             web_page, child_url_list = crawl_web_page(url)
-
-            with open(html_file_name, 'w') as html_file:
-                html_file.write(web_page.encode('utf-8'))
-
             url_crawled.append(url)
 
             if url_dictionary['Level'] < args.depth and child_url_list:
                 child_url_dict_list = []
                 for link in child_url_list:
-                    document_id += 1
                     child_url_dict_list.append({
-                        'Url' : link,
+                        'Url' : link.rstrip('/'),
                         'Level' : url_dictionary['Level'] + 1,
                         'ParentDocumentID' : url_dictionary['DocumentID'],
-                        'DocumentID' : 'D' + str(document_id)
+                        'DocumentID' : html_file_name_regex.search(link).group(1),
                     })
                 if args.alternate_crawling:
                     url_list = child_url_dict_list + url_list
@@ -78,11 +73,30 @@ def crawl():
                     url_list += child_url_dict_list
 
             time.sleep(args.wait_between)
+        else:
+            inlinks[url_dictionary['DocumentID']].append(url_dictionary['ParentDocumentID'])
+    print "Crawled {0} links".format(len(url_crawled))
+
+    while (url_list):
+        url_dictionary = url_list.pop(0)
+        if url_dictionary['DocumentID'] in inlinks and url_dictionary['ParentDocumentID'] in inlinks:
+            inlinks[url_dictionary['DocumentID']].append(url_dictionary['ParentDocumentID'])
+
+    try:
+        os.mkdir(args.output_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
+        pass
+    os.chdir(args.output_dir)
+    print "Created '{0}' directory to save crawl results".format(args.output_dir)
 
     with open('links.txt', 'w') as link_file:
         for url in (url_crawled):
             link_file.write("{0}\n".format(url.encode('utf-8')))
-    print "Crawled {0} links".format(len(url_crawled))
+    with open('inlinks.txt', 'w') as inlink_file:
+        for docid in inlinks:
+            inlink_file.write("{0} {1}\n".format(docid, " ".join(inlinks[docid])))
 
 def crawl_web_page(url):
     response = requests.get(url)
@@ -97,8 +111,8 @@ def crawl_web_page(url):
         if href_regex.match(child_url) and ((args.keyword and (keyword_regex.match(child_url) or keyword_regex.match(link.string))) or not args.keyword):
             url_list.append(child_url.split('#', 1)[0])
 
-    return soup.prettify(), url_list
+    return soup.prettify(), (list(OrderedDict.fromkeys(url_list)))
 
 crawl()
 
-print "Find the links crawled in 'links.txt' under '{0}' directory\nCompleted in {1}".format(args.output_dir, datetime.now() - startTime)
+print "Find 'links.txt' and 'inlinks.txt' under '{0}' directory\nCompleted in {1}".format(args.output_dir, datetime.now() - startTime)

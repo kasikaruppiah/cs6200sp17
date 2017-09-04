@@ -1,0 +1,1 @@
+dp1 s 3degrees p2 i837 ss 100 25renewableenergy p3 i7068 ss 80plus p4 i1570 ss 1973oilcrisis p5 i8584 ss 1979energycrisis p6 i3693 s
