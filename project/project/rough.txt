@@ -1,0 +1,3 @@
+task 1:
+- take term weightage for multiple occurances of a term in the query
+- run TREC-EVAL and compare the Performance score of task 4

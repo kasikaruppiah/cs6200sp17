@@ -1,0 +1,26 @@
+Search A   - Search B   : pval
+bm25_base  - bm25_stopping : 0.341159711048
+bm25_base  - bm25_thesaurus : 0.000333513523361
+bm25_base  - lucene     : 0.0385870730652
+bm25_base  - tfidf_base : 0.00112928838498
+bm25_base  - tfidf_stopping : 0.0146453800291
+bm25_base  - tfidf_thesaurus : 3.79309154248e-10
+bm25_stopping - bm25_thesaurus : 0.000109115890905
+bm25_stopping - lucene     : 0.0153510810001
+bm25_stopping - tfidf_base : 0.000340394953217
+bm25_stopping - tfidf_stopping : 0.00531951061897
+bm25_stopping - tfidf_thesaurus : 1.18317760135e-10
+bm25_thesaurus - lucene     : 0.0163156665416
+bm25_thesaurus - tfidf_base : 0.183643675936
+bm25_thesaurus - tfidf_stopping : 0.0438453915658
+bm25_thesaurus - tfidf_thesaurus : 0.0011957316721
+lucene     - tfidf_base : 0.0639202109714
+lucene     - tfidf_stopping : 0.308201989623
+lucene     - tfidf_thesaurus : 1.67976177635e-08
+tfidf_base - tfidf_stopping : 0.157502913148
+tfidf_base - tfidf_thesaurus : 2.54607731577e-06
+tfidf_stopping - tfidf_thesaurus : 1.49671830597e-07
+
+
+The Null-Hypot lllhesis is rejected if the p-value is less than alpha, which is 
+typically 0.05 for T-tests. Thus, if pval< 0.05, the results from the 2 searches is    significantly different and one of the algorithms is significantly better than the other.

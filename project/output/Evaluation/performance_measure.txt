@@ -1,0 +1,27 @@
+bm25_thesaurus:
+	Mean Average Precision: 0.111871932083
+	Mean Reciprocal Rank: 0.352039022284
+bm25_stemming:
+	Mean Average Precision: 0.0243752480324
+	Mean Reciprocal Rank: 0.044001610306
+tfidf_thesaurus:
+	Mean Average Precision: 0.0492897836482
+	Mean Reciprocal Rank: 0.147677448081
+bm25_base:
+	Mean Average Precision: 0.198116712114
+	Mean Reciprocal Rank: 0.810851648352
+lucene:
+	Mean Average Precision: 0.159090677632
+	Mean Reciprocal Rank: 0.71036995412
+tfidf_stemming:
+	Mean Average Precision: 0.00479186245901
+	Mean Reciprocal Rank: 0.00723443223443
+bm25_stopping:
+	Mean Average Precision: 0.208120525213
+	Mean Reciprocal Rank: 0.806790645252
+tfidf_base:
+	Mean Average Precision: 0.130786708803
+	Mean Reciprocal Rank: 0.520132461426
+tfidf_stopping:
+	Mean Average Precision: 0.149430380898
+	Mean Reciprocal Rank: 0.58355822863

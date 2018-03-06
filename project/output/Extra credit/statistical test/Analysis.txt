@@ -1,0 +1,52 @@
+1) Taking BM25 as the baseline and comparing other search engines with it,
+we get the following results
+
+Search Engine A   -    Search Search B      :   pval
+
+bm25_base         -    bm25_stopping       : 0.341159711048
+bm25_base         -    bm25_thesaurus      : 0.000333513523361
+bm25_base         -    lucene              : 0.0385870730652
+bm25_base         -    tfidf_base          : 0.00112928838498
+bm25_base         -    tfidf_stopping      : 0.0146453800291
+bm25_base         -    tfidf_thesaurus     : 3.79309154248e-10
+
+2) The Null-Hypothesis is rejected if the p-value is less than alpha, which is 
+typically 0.05 for T-tests. Thus, if pval< 0.05, the results from the 2 searches is 
+significantly different and one of the algorithms is significantly better than the other.
+
+Now we have 4 pval values that are less than 0.05:
+
+bm25_base         -    bm25_thesaurus      : 0.000333513523361
+bm25_base         -    lucene              : 0.0385870730652
+bm25_base         -    tfidf_base          : 0.00112928838498
+bm25_base         -    tfidf_stopping      : 0.0146453800291
+
+We can conclude that the Null-Hypothesis for these 4 comparisons is false, which
+means either these search algorithms are much better or much worse than BM25 and 
+the difference is not worth neglecting.
+
+Now we compare the MAP (Mean Average Precision) of these algorithms with the MAP of
+our baseline BM25
+
+Run                 Mean Average Precision
+BM25                    0.198
+bm25_thesaurus          0.118
+TFIDF                   0.130   
+TFIDF_Stopping          0.149
+Lucene                  0.159
+
+So as we see, the MAP of BM25 baseline is highest among these. Which means that 
+BM25 is significantly better than all of these search algorithms.
+
+As, a side point we can see that bm25_stopping has a higher MAP than BM25 baseline
+but its p-value for T-test is not < 0.05. 
+
+Run                 Mean Average Precision
+BM25                    0.198
+BM25_Stopping           0.208
+
+
+Which means that it is better than the BM25
+baseline but not significantly better.
+
+
